@@ -9,6 +9,9 @@ import {
   saveTag,
   generateId,
 } from './db'
+import { supabase, isSupabaseConfigured } from './supabaseClient'
+import { isAuthenticated, syncData, setupAutoSync } from './sync'
+import Auth from './components/Auth'
 import EntryList from './components/EntryList'
 import EntryEditor from './components/EntryEditor'
 import CalendarView from './components/CalendarView'
@@ -24,6 +27,39 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [user, setUser] = useState<any>(null)
+  const [authChecked, setAuthChecked] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
+
+  // Check authentication status on mount
+  useEffect(() => {
+    checkAuth()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        setShowAuth(false)
+        // Sync data when user signs in
+        syncData().then(() => loadData())
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  // Set up auto-sync when authenticated
+  useEffect(() => {
+    if (!user || !isSupabaseConfigured()) {
+      return
+    }
+
+    // Set up automatic sync every 5 minutes
+    const cleanup = setupAutoSync(5 * 60 * 1000)
+    return cleanup
+  }, [user])
 
   // Load entries and tags on mount
   useEffect(() => {
@@ -48,6 +84,22 @@ function App() {
   useEffect(() => {
     filterEntries()
   }, [entries, searchQuery, selectedTags])
+
+  const checkAuth = async () => {
+    if (!isSupabaseConfigured()) {
+      setAuthChecked(true)
+      return
+    }
+
+    const authenticated = await isAuthenticated()
+    if (authenticated) {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      // Sync data after checking auth
+      await syncData()
+    }
+    setAuthChecked(true)
+  }
 
   const loadData = async () => {
     const loadedEntries = await getAllEntries()
@@ -94,6 +146,11 @@ function App() {
     await loadData()
     setIsEditing(false)
     setSelectedEntry(null)
+
+    // Sync after saving if authenticated
+    if (user) {
+      syncData()
+    }
   }
 
   const handleDeleteEntry = async (id: string) => {
@@ -101,6 +158,11 @@ function App() {
     await loadData()
     if (selectedEntry?.id === id) {
       setSelectedEntry(null)
+    }
+
+    // Sync after deleting if authenticated
+    if (user) {
+      syncData()
     }
   }
 
@@ -127,6 +189,37 @@ function App() {
     )
   }
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+  }
+
+  const handleAuthStateChange = () => {
+    // Refresh auth state
+    checkAuth()
+  }
+
+  // Show loading while checking auth
+  if (!authChecked) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: 'var(--text-secondary)'
+      }}>
+        Loading...
+      </div>
+    )
+  }
+
+  // Show auth screen if Supabase is configured but user is not authenticated
+  if (isSupabaseConfigured() && !user && showAuth) {
+    return <Auth onAuthStateChange={handleAuthStateChange} />
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -136,6 +229,22 @@ function App() {
             <div className={`online-dot ${isOnline ? '' : 'offline'}`} />
             {isOnline ? 'Online' : 'Offline'}
           </div>
+          {isSupabaseConfigured() && (
+            user ? (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  {user.email}
+                </span>
+                <button className="btn btn-secondary" onClick={handleSignOut}>
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button className="btn btn-secondary" onClick={() => setShowAuth(true)}>
+                Sign In
+              </button>
+            )
+          )}
           <button className="btn btn-primary" onClick={handleNewEntry}>
             + New Entry
           </button>
@@ -195,6 +304,11 @@ function App() {
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               Total entries: {entries.length}
             </p>
+            {isSupabaseConfigured() && user && (
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                Syncing enabled
+              </p>
+            )}
           </div>
         </aside>
 

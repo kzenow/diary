@@ -11,13 +11,14 @@
     "deploy:aws:ps": "powershell -ExecutionPolicy Bypass -File deploy-aws.ps1"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "idb": "^8.0.0",
-    "date-fns": "^3.0.0",
+    "@supabase/supabase-js": "^2.79.0",
     "@tiptap/react": "^2.1.0",
     "@tiptap/starter-kit": "^2.1.0",
-    "react-calendar": "^4.8.0"
+    "date-fns": "^3.0.0",
+    "idb": "^8.0.0",
+    "react": "^18.3.1",
+    "react-calendar": "^4.8.0",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

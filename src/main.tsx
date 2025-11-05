@@ -9,6 +9,7 @@ const updateSW = registerSW({
   onNeedRefresh() {
     if (confirm('New content available. Reload?')) {
       updateSW(true)
+      
     }
   },
   onOfflineReady() {

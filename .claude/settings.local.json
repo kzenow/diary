@@ -7,7 +7,10 @@
       "Bash(npm run dev:*)",
       "Bash(npm run build:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nFix TypeScript compilation errors for AWS Amplify build\n\nRemove unused variables and imports that were preventing the build from completing:\n- Remove unused getEntriesByTag import from App.tsx\n- Remove unused db variables in db.ts helper functions\n- Clean up sync.ts template to only include actively used code\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix TypeScript compilation errors for AWS Amplify build\n\nRemove unused variables and imports that were preventing the build from completing:\n- Remove unused getEntriesByTag import from App.tsx\n- Remove unused db variables in db.ts helper functions\n- Clean up sync.ts template to only include actively used code\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(npm install:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd Supabase cloud sync functionality\n\nImplement full cloud sync with Supabase:\n- Add Supabase client integration with environment variables\n- Create authentication component with email/password and Google OAuth\n- Implement bidirectional sync for entries and tags\n- Add automatic sync every 5 minutes and on reconnection\n- Implement conflict resolution using last-write-wins strategy\n- Add sign in/out UI to header\n- Include SQL schema and setup documentation\n\nFeatures:\n- Works offline-first with local IndexedDB storage\n- Optional cloud sync when signed in\n- Multi-device synchronization\n- Secure with Row Level Security policies\n- Auto-sync on create/edit/delete operations\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

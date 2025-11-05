@@ -6,7 +6,8 @@
       "Bash(npm install)",
       "Bash(npm run dev:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix TypeScript compilation errors for AWS Amplify build\n\nRemove unused variables and imports that were preventing the build from completing:\n- Remove unused getEntriesByTag import from App.tsx\n- Remove unused db variables in db.ts helper functions\n- Clean up sync.ts template to only include actively used code\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

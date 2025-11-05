@@ -7,6 +7,7 @@ import {
   searchEntries,
   getAllTags,
   saveTag,
+  deleteTag,
   generateId,
 } from './db'
 import { supabase, isSupabaseConfigured } from './supabaseClient'
@@ -15,6 +16,7 @@ import Auth from './components/Auth'
 import EntryList from './components/EntryList'
 import EntryEditor from './components/EntryEditor'
 import CalendarView from './components/CalendarView'
+import TagManager from './components/TagManager'
 import './App.css'
 
 function App() {
@@ -30,6 +32,7 @@ function App() {
   const [user, setUser] = useState<any>(null)
   const [authChecked, setAuthChecked] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
+  const [showTagManager, setShowTagManager] = useState(false)
 
   // Check authentication status on mount
   useEffect(() => {
@@ -199,6 +202,26 @@ function App() {
     checkAuth()
   }
 
+  const handleSaveTag = async (tag: Tag) => {
+    await saveTag(tag)
+    await loadData()
+
+    // Sync after saving tag if authenticated
+    if (user) {
+      syncData()
+    }
+  }
+
+  const handleDeleteTag = async (id: string) => {
+    await deleteTag(id)
+    await loadData()
+
+    // Sync after deleting tag if authenticated
+    if (user) {
+      syncData()
+    }
+  }
+
   // Show loading while checking auth
   if (!authChecked) {
     return (
@@ -282,22 +305,40 @@ function App() {
             </div>
           </div>
 
-          {tags.length > 0 && (
-            <div className="sidebar-section">
-              <h3>Tags</h3>
+          <div className="sidebar-section">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0 }}>Tags</h3>
+              <button
+                className="btn-icon"
+                onClick={() => setShowTagManager(true)}
+                title="Manage Tags"
+              >
+                ⚙️
+              </button>
+            </div>
+            {tags.length > 0 ? (
               <div className="tag-list">
                 {tags.map(tag => (
                   <button
                     key={tag.id}
                     className={`tag ${selectedTags.includes(tag.name) ? 'active' : ''}`}
+                    style={{
+                      backgroundColor: selectedTags.includes(tag.name) ? tag.color : 'transparent',
+                      borderColor: tag.color,
+                      color: selectedTags.includes(tag.name) ? 'white' : tag.color
+                    }}
                     onClick={() => toggleTag(tag.name)}
                   >
                     {tag.name}
                   </button>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                No tags yet. Click ⚙️ to create tags.
+              </p>
+            )}
+          </div>
 
           <div className="sidebar-section">
             <h3>Stats</h3>
@@ -316,12 +357,14 @@ function App() {
           {isEditing ? (
             <EntryEditor
               entry={selectedEntry}
+              tags={tags}
               onSave={handleSaveEntry}
               onCancel={handleCancelEdit}
             />
           ) : currentView === 'list' ? (
             <EntryList
               entries={filteredEntries}
+              tags={tags}
               selectedEntry={selectedEntry}
               onSelectEntry={handleSelectEntry}
               onDeleteEntry={handleDeleteEntry}
@@ -334,6 +377,15 @@ function App() {
           )}
         </main>
       </div>
+
+      {showTagManager && (
+        <TagManager
+          tags={tags}
+          onSaveTag={handleSaveTag}
+          onDeleteTag={handleDeleteTag}
+          onClose={() => setShowTagManager(false)}
+        />
+      )}
     </div>
   )
 }

@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { DiaryEntry, Attachment } from '../types'
+import { DiaryEntry, Attachment, Tag } from '../types'
 import { generateId } from '../db'
 import './EntryEditor.css'
 
 interface EntryEditorProps {
   entry: DiaryEntry | null
+  tags: Tag[]
   onSave: (entry: DiaryEntry) => void
   onCancel: () => void
 }
 
-export default function EntryEditor({ entry, onSave, onCancel }: EntryEditorProps) {
+export default function EntryEditor({ entry, tags: allTags, onSave, onCancel }: EntryEditorProps) {
   const [title, setTitle] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
@@ -182,12 +183,29 @@ export default function EntryEditor({ entry, onSave, onCancel }: EntryEditorProp
           </button>
         </div>
         <div className="tag-list">
-          {tags.map(tag => (
-            <span key={tag} className="tag">
-              {tag}
-              <button onClick={() => removeTag(tag)}>×</button>
-            </span>
-          ))}
+          {tags.map(tagName => {
+            const tagData = allTags.find(t => t.name === tagName)
+            const tagColor = tagData?.color || '#4f46e5'
+            return (
+              <span
+                key={tagName}
+                className="tag"
+                style={{
+                  backgroundColor: tagColor,
+                  color: 'white',
+                  borderColor: tagColor
+                }}
+              >
+                {tagName}
+                <button
+                  onClick={() => removeTag(tagName)}
+                  style={{ color: 'white', opacity: 0.8 }}
+                >
+                  ×
+                </button>
+              </span>
+            )
+          })}
         </div>
       </div>
 

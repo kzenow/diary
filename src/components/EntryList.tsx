@@ -1,8 +1,9 @@
-import { DiaryEntry } from '../types'
+import { DiaryEntry, Tag } from '../types'
 import './EntryList.css'
 
 interface EntryListProps {
   entries: DiaryEntry[]
+  tags: Tag[]
   selectedEntry: DiaryEntry | null
   onSelectEntry: (entry: DiaryEntry) => void
   onDeleteEntry: (id: string) => void
@@ -10,6 +11,7 @@ interface EntryListProps {
 
 export default function EntryList({
   entries,
+  tags,
   selectedEntry,
   onSelectEntry,
   onDeleteEntry,
@@ -67,11 +69,23 @@ export default function EntryList({
             <span className="entry-date">{formatDate(entry.createdAt)}</span>
             {entry.tags.length > 0 && (
               <div className="entry-tags">
-                {entry.tags.map(tag => (
-                  <span key={tag} className="entry-tag">
-                    {tag}
-                  </span>
-                ))}
+                {entry.tags.map(tagName => {
+                  const tagData = tags.find(t => t.name === tagName)
+                  const tagColor = tagData?.color || '#4f46e5'
+                  return (
+                    <span
+                      key={tagName}
+                      className="entry-tag"
+                      style={{
+                        backgroundColor: tagColor,
+                        color: 'white',
+                        borderColor: tagColor
+                      }}
+                    >
+                      {tagName}
+                    </span>
+                  )
+                })}
               </div>
             )}
           </div>

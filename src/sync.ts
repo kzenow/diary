@@ -194,9 +194,19 @@ export async function syncTags(): Promise<void> {
     // Download tags from server
     const serverTags = await fetchTagsFromServer()
 
-    // Save server tags locally
+    // Delete server tags that don't exist locally
+    const localTagIds = new Set(localTags.map(t => t.id))
+    for (const serverTag of serverTags) {
+      if (!localTagIds.has(serverTag.id)) {
+        await deleteTagFromServer(serverTag.id)
+      }
+    }
+
+    // Save server tags locally (only those that still exist on server)
     for (const tag of serverTags) {
-      await saveTag(tag)
+      if (localTagIds.has(tag.id) || !localTags.find(t => t.id === tag.id)) {
+        await saveTag(tag)
+      }
     }
 
     console.log('Tag sync completed successfully')
@@ -248,6 +258,23 @@ async function fetchTagsFromServer(): Promise<Tag[]> {
     }))
   } catch (error) {
     console.error('Failed to fetch tags from server:', error)
+    throw error
+  }
+}
+
+/**
+ * Delete a tag from the server
+ */
+async function deleteTagFromServer(id: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('tags')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+  } catch (error) {
+    console.error('Failed to delete tag from server:', error)
     throw error
   }
 }

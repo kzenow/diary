@@ -5,7 +5,6 @@ import {
   saveEntry,
   deleteEntry,
   searchEntries,
-  getEntriesByTag,
   getAllTags,
   saveTag,
   generateId,

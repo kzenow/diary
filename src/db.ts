@@ -78,7 +78,6 @@ export async function deleteEntry(id: string): Promise<void> {
 }
 
 export async function searchEntries(query: string): Promise<DiaryEntry[]> {
-  const db = await getDB()
   const allEntries = await getAllEntries()
 
   const lowerQuery = query.toLowerCase()
@@ -96,7 +95,6 @@ export async function getEntriesByTag(tagName: string): Promise<DiaryEntry[]> {
 }
 
 export async function getEntriesByDateRange(start: Date, end: Date): Promise<DiaryEntry[]> {
-  const db = await getDB()
   const allEntries = await getAllEntries()
 
   const startTime = start.getTime()

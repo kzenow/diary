@@ -12,12 +12,13 @@
  * 5. Call syncData() periodically when online
  */
 
-import { DiaryEntry, Tag } from './types'
-import { getAllEntries, saveEntry, getAllTags, saveTag } from './db'
+import { DiaryEntry } from './types'
+import { getAllEntries, saveEntry } from './db'
 
-// Configuration - Replace with your backend URL and API key
-const BACKEND_URL = 'YOUR_BACKEND_URL'
-const API_KEY = 'YOUR_API_KEY'
+// When implementing sync, also import: Tag, getAllTags, saveTag from './db'
+// Add your backend configuration:
+// const BACKEND_URL = 'YOUR_BACKEND_URL'
+// const API_KEY = 'YOUR_API_KEY'
 
 /**
  * Check if user is authenticated
@@ -65,7 +66,7 @@ export async function syncEntries(): Promise<void> {
 /**
  * Upload a single entry to the server
  */
-async function uploadEntry(entry: DiaryEntry): Promise<void> {
+async function uploadEntry(_entry: DiaryEntry): Promise<void> {
   // TODO: Implement upload logic
   // Example with fetch:
   /*
